@@ -1,7 +1,11 @@
-**SMLM Tutorial**
+**Welcome to the SMLM Tutorial webspace**
 
-In this space I will summarize and provide a general introduction into single molecule localisation microscopy. 
+Here I will summarize and provide a general introduction into single molecule localisation microscopy. 
 
-Please take a look at the wiki to get started. 
+Please take a look at the [wiki](https://github.com/christian-7/SMLM_Tutorial/wiki) to get started. 
+
+Enjoy SMLM!
+
+
 
 
