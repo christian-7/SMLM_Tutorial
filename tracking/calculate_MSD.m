@@ -1,7 +1,20 @@
+%% calculate MSD and D
+
+% Author: Christian Sieben, EPFL 
+% sieben.christian@gmail.com
+% January 2020
+
 % This script uses the @msdanalyzer class developed by Jean-Yves Tinevez
 % download at: https://tinevez.github.io/msdanalyzer/
+
+% Content
+
+% 1. Initialize @msdanalyzer 
+% 2. Calculate MSD curves
+% 3. Estimating diffusion coefficient
+
 close all
-%% Calculate MSD 
+%% 1. Initialize @msdanalyzer 
 
 % initiate units
 
@@ -12,6 +25,8 @@ TIME_UNITS      = 's';
 
 ma = msdanalyzer(2, SPACE_UNITS, TIME_UNITS);
 ma = ma.addAll(tracks);
+
+%% 2. Calculate MSD curves
 
 % Compute MSD and plot individual MSD curves
 
@@ -26,7 +41,7 @@ subplot(1,2,2)
 ma.plotMeanMSD(gca, true);box on
 title('weighted average curve')
 
-%% Estimating diffusion coefficient
+%% 3. Estimating diffusion coefficient
 clc
 % Mean of all curves
 
