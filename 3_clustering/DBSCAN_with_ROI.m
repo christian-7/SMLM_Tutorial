@@ -76,7 +76,7 @@ subset(:,end+1) = class2(coreBorder);
 figure('Position',[100 500 600 300])
 subplot(1,2,1)
 scatter(locs_ROI(:,xCol),locs_ROI(:,yCol),1);
-title('Raw Data');xlabel('x [nm]');ylabel('x [nm]');
+title('input points');xlabel('x [nm]');ylabel('y [nm]');
 axis square
 axis([min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))])
 box on
@@ -84,7 +84,7 @@ box on
 
 subplot(1,2,2)
 scatter(subset(:,xCol),subset(:,yCol),1,mod(subset(:,end),10))
-title('identified Clusters');xlabel('x [nm]');ylabel('x [nm]');
+title('identified clusters');xlabel('x [nm]');ylabel('y [nm]');
 axis square
 axis([min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))])
 box on
