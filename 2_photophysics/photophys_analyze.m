@@ -1,9 +1,25 @@
-%% Load Tracks
+%% Analyze dye photophysics from SMLM data (processing part)
+% 
+% Author: Christian Sieben, EPFL 
+% sieben.christian@gmail.com
+% April 2020
 
-% Output from photophys_tracking_merging
+% 1.    Load Tracks
+% 2.    Calculate Track length
+% 3.1   Calculate Track Spread (i.e. sigma)
+% 3.2   Calculate gaussian PDF of x and y dimensions (overlay all molecules)
+% 3.3   Calculate gaussian PDF of x and y dimensions (individual molecules)
+% 4.    Find Gaps and measure length --> Dark time
+
+clear, clc, close all
+SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial';
+
+%% 1. Load Tracks
+
+% Output from photophys_head
 
 % To get the merging parameters, use output: Tracks_GapMax_
-% should have the form:
+% The array should have the form:
 
 % res1 = x
 % res2 = y
@@ -12,9 +28,8 @@
 % res5 = frame
 % res6 = track ID
 
-% all_tracks = all_res;
 all_tracks = res;
-%% Calculate Track length
+%% 2. Calculate Track length
 
 %%%%%%%%%%%%
 % On-time distribution (On-time)
@@ -27,10 +42,10 @@ all_tracks = res;
 
 tracklength=[];
 
-for index=1:max(all_tracks(:,6))
+for index = 1:max(all_tracks(:,6))
     
-    track=find(all_tracks(:,6)==index);
-    tracklength=cat(1,tracklength,length(track));
+    track = find(all_tracks(:,6)==index);
+    tracklength = cat(1,tracklength,length(track));
     
     clear track
 end
@@ -38,7 +53,7 @@ end
 % Plot Track length histogram
 
 binCenters = 0:5:50;
-x=transpose(hist(tracklength,binCenters)); 
+x = transpose(hist(tracklength,binCenters)); 
 
 figure('Position',[100 500 300 300],'name','Track length histogram') 
 bar(binCenters,x/sum(x));hold on;
@@ -49,10 +64,11 @@ xlabel('on time (frames)');
 ylabel('norm counts')
 
 
-%% Calculate Track Spread
+%% 3.1 Calculate Track Spread (i.e. sigma)
+%  3.1 can be used to make a figure visualizing sigma
 
 %%%%%%%%%%%%
-% The lateral spread of localizations 
+% The lateral spread of localizations (i.e. sigma)
 %%%%%%%%%%%%
 
 clusterx=[];
@@ -92,11 +108,12 @@ end
 
 clear max
 
-figure('Position',[100 100 500 500],'name','Spread of Molecule (Overlay)')
+figure('Position',[100 100 500 500],'name','XY spread of all molecules')
 
 subplot(2,2,1)
-scatter(allclustersCx, allclustersCy)
-title('Overlay all clusters');
+scatter(allclustersCx, allclustersCy,'k.')
+title('overlay all points');
+box on; axis square; 
 xlabel('x (nm)');
 ylabel('y (nm)');
 axis([-100 100 -100 100])
@@ -110,30 +127,23 @@ xlabel('x (nm)');
 ylabel('y (nm)');
 colormap('hot')
 
-binCenters = -200:10:200;
-x=transpose(hist(allclustersCx,binCenters)); 
-x2=transpose(hist(allclustersCy,binCenters)); 
-x3=[x/sum(x)];
-x4=[x2/sum(x2)];
-
 subplot(2,2,3)
-bar(binCenters, x3)
+histogram(allclustersCx,40,'Normalization','probability');
 title('Histogram over x');
 xlabel('x (nm)');
 ylabel('norm counts');
-axis([-100 100 0 0.6])
+axis([-100 100 0 0.3])
 
 subplot(2,2,4)
-bar(binCenters, x4)
+histogram(allclustersCy,40,'Normalization','probability');
 title('Histogram over y');
 xlabel('y (nm)');
 ylabel('norm counts');
-axis([-100 100 0 0.6])
+axis([-100 100 0 0.3])
 
 % make another figure
 
-
-figure('Position',[200 100 500 500]);
+figure('Position',[600 100 500 500]);
 
 ah1 = subplot(4, 4, [3 4 7 8]);
 scatter(allclustersCx, allclustersCy,1,'black');
@@ -145,35 +155,36 @@ box on
 axis square
 
 subplot(4, 4, [2 6]);
-bar(binCenters, x3);
-xlabel('x (nm)','FontSize',10);
+histogram(allclustersCy,40,'Normalization','probability');
+xlabel('y (nm)','FontSize',10);
 ylabel('norm counts','FontSize',10);
-axis([-100 100 0 0.4])
+axis([-100 100 0 0.3])
 view(-90, -90)
 
 subplot(4, 4, [11 12]);
-bar(binCenters, x4);
-xlabel('y (nm)','FontSize',10);
+histogram(allclustersCx,40,'Normalization','probability');
+xlabel('x (nm)','FontSize',10);
 ylabel('norm counts','FontSize',10);
-axis([-100 100 0 0.4])
+axis([-100 100 0 0.3])
 view(180, 90)
 
-%% Calculate gaussian PDF of x and y dimensions, overlay with histogram
+%% 3.2 Calculate gaussian PDF of x and y dimensions (overlay all molecules)
+%  3.2 determine average sigma all molecules 
 
 %%%%%%%%%%%%
 % Fit the lateral spread of localizations to normal distribution
 % Average for all molecules
 %%%%%%%%%%%%
 
-figure('Position',[100 500 1000 300],'name','PDF of x and y radius (Overlay)')
+figure('Position',[100 500 700 300],'name','PDF of x and y radius (Overlay)')
 
 % create normal distribution
 
-pdx=fitdist(allclustersCx,'normal')
-pdy=fitdist(allclustersCy,'normal')
+pdx = fitdist(allclustersCx,'normal')
+pdy = fitdist(allclustersCy,'normal')
 
-y = pdf(pdx,allclustersCx);
-y2= pdf(pdy,allclustersCy);
+y   = pdf(pdx,allclustersCx);
+y2  = pdf(pdy,allclustersCy);
 
 
 binCenters = -200:10:200;
@@ -186,25 +197,28 @@ subplot(1,2,1)
 bar(binCenters,x3/max(x3));
 hold on
 scatter(allclustersCx,y/max(y),1,'red')
-axis([-200 200 0 1])
+axis([-100 100 0 1.1])
+box on; axis square;
 title('PDF x dimension');
-xlabel('radius (nm)');
-ylabel('pdf');
+xlabel('x (nm)','FontSize',12);
+ylabel('pdf','FontSize',12);
 hold off
-
-clear f x
+legend(['\sigma _x = ' num2str(pdx.sigma)], 'FontSize',12);
 
 subplot(1,2,2)
 bar(binCenters,x4/max(x4));
 hold on
 scatter(allclustersCy,y2/max(y2),1,'red')
-axis([-200 200 0 1])
+axis([-100 100 0 1.1])
+box on; axis square;
 title('PDF y dimension');
-xlabel('radius (nm)');
-ylabel('pdf');
+xlabel('x (nm)','FontSize',12);
+ylabel('pdf','FontSize',12);
 hold on
+legend(['\sigma _y = ' num2str(pdy.sigma)], 'FontSize',12);
 
-%% Calculate Gaussian XY PDF of individual molecules
+%% 3.3 Calculate gaussian PDF of x and y dimensions (individual molecules)
+%  3.3 determine average sigma of individial molecules 
 
 %%%%%%%%%%%%
 % Fit the lateral spread of localizations to normal distribution
@@ -226,8 +240,8 @@ for index=1:max(all_tracks(:,6));
     
         if  length(vx)>10;                                                             % if nan, copy  frame number in new
 
-            clusterx=all_tracks(vx,1);
-            clustery=all_tracks(vx,2);
+            clusterx = all_tracks(vx,1);
+            clustery = all_tracks(vx,2);
             
             clusterxC=sum(clusterx)/length(clusterx);
             clusteryC=sum(clustery)/length(clustery);
@@ -237,30 +251,30 @@ for index=1:max(all_tracks(:,6));
             pdx=fitdist(clusterx,'normal');
             pdy=fitdist(clustery,'normal');
             
-            loc_prec_x=vertcat(loc_prec_x, pdx.sigma);
-            loc_prec_y=vertcat(loc_prec_y, pdy.sigma);
+            loc_prec_x = vertcat(loc_prec_x, pdx.sigma);
+            loc_prec_y = vertcat(loc_prec_y, pdy.sigma);
 
 
         else end
 
 end
+clc
+Mean_loc_prec_x = fitdist(loc_prec_x,'normal')
+Mean_loc_prec_y = fitdist(loc_prec_y,'normal')
 
-Mean_loc_prec_x=fitdist(loc_prec_x,'normal')
-Mean_loc_prec_y=fitdist(loc_prec_y,'normal')
-
-%% Find Gaps and Measure length --> Dark time
+%% 4. Find Gaps and measure length --> Dark time
 
 %%%%%%%%%%%%
 % Dark time distribution (Off-time)
 %%%%%%%%%%%%
 
-allgaps=[];
+allgaps = [];
 
-for i=1:max(all_tracks(:,6)); 
+for i = 1:max(all_tracks(:,6)); 
     
-    vx=find(all_tracks(:,6)==i);
+    vx = find(all_tracks(:,6)==i);
     
-    track=all_tracks(vx,5)-min(all_tracks(vx,5))+1;
+    track = all_tracks(vx,5)-min(all_tracks(vx,5))+1;
     
     gaps=[];
     gaps(1,1)=1;
@@ -278,7 +292,7 @@ for i=1:max(all_tracks(:,6));
     
 end
 
-binCenters = 0:10:3000;
+binCenters = 0:100:10000;
 x=transpose(hist(allgaps,binCenters)); 
 
 
@@ -289,17 +303,17 @@ xlabel('Off time [frames]');
 ylabel('norm counts');
 hold on
 
-
+% 
 % figure
 % hist(allgaps,10);
 % title(['Mean = ', num2str(mean(allgaps))]);
-
-
+% 
+% 
 % ft = fittype('exp1');
 % [gapfit, gof] = fit(binCenters,x,'exp1');
 % save('gap.mat','gapfit','ft','gof','binCenters','x')
-
+% 
 % [CdfY,CdfX] = ecdf(allgaps,'Function','cdf'); 
 % [gapfit, gof] = fit(CdfX,CdfY,'exp1');
 % save('gap.mat','gapfit','ft','gof','binCenters','x')
-    
+%     

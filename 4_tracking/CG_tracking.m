@@ -3,8 +3,11 @@
 % unsing the Crocker, Weeks, and Grier Algorithm (http://www.physics.emory.edu/rweeks/idl/index.html)
 
 % clear, close all, clc, clear
+
+
 %%  %%%%%%%%%% INPUT Parameters %%%%%%%%%%
-function [res]=CG_tracking_TS_input(filename_peaks, max_disp, gap, saveYN);
+
+function [res] = CG_tracking(filename_peaks, max_disp, gap, saveYN);
 
 % filename_peaks='NB_Nbr5_A647_COT_1500mW_1_MMStack_locResults_processed';     % filename of TS output file
 % 
