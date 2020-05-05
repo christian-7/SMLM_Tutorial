@@ -9,7 +9,7 @@
 % 1. Load loc file 
 % 2. Filter and vizualize
 % 3. Select ROI
-% 4. Track
+% 4. Track using C&G  
 % 5. Filter tracks
 % 6. Export tracks
 
@@ -17,12 +17,12 @@
 
 clear, close all, clc, clear
 
-pathd = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos'); % Data path
-pathR = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos/analysis'); % Results path
+pathd = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos');            % Data path
+pathR = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos/analysis');   % Results path
 
-imageID = 2;
+imageID = 4;
 
-name_base = 'A549_M1mEosC1_447_gain300_30ms_002';
+name_base = ['A549_M1mEosC1_447_gain300_30ms_00' num2str(imageID)];
 
 pxl_size    = 160;  % nm
 time_step   = 0.03; % in sec
@@ -31,7 +31,7 @@ time_step   = 0.03; % in sec
 
 cd(pathd);
 locs        = dlmread([name_base '.csv'],',',1,0);
-WF_image    = imread(['STD_' name_base '.tif']);
+WF_image    = imread(['STD_' name_base '.tif']);                        % or STD image
 
 file = fopen([name_base '.csv']);
 line = fgetl(file);
@@ -163,7 +163,7 @@ ROIselect   = pos_list(vx,1:end);
 
 close all
 figure('Position',[100 200 400 400],'Name','Selected ROI')  
-scatter(ROIselect(:,1),ROIselect(:,2),1);hold on;
+scatter(ROIselect(:,1),ROIselect(:,2),1);hold on; box on;
 title('Selected ROI, Input for tracking');
 xlabel('x [pxl]');
 ylabel('y [pxl]');
@@ -235,13 +235,13 @@ end
 
 figure('Position',[100 600 700 300],'Name',['Overlay'])
 subplot(1,2,1);
-imagesc((WF_image));hold on; axis square; title('STD + Points');
+imagesc(WF_image,[0 10*median(WF_image(:))]);hold on; axis square; title('STD + Points');
 colormap(jet);
 scatter(res_filt(:,1),res_filt(:,2),'r.');
 
 
 subplot(1,2,2);
-imagesc((WF_image));hold on;axis square;title('STD + Tracks');
+imagesc(WF_image,[0 10*median(WF_image(:))]);hold on;axis square;title('STD + Tracks');
 colormap(gray);
 
 for i=1:max(res_filt(:,4))
@@ -269,7 +269,7 @@ for index = 1:max(res_filt(:,4))
     clear track
 end
 
-figure('Position',[100 100 600 200],'Name',['Track length'])
+figure('Position',[100 100 750 300],'Name',['Track length'])
 subplot(1,2,1)
 hist(tracklength(tracklength>min_length),30);
 title(['Mean Length = ',num2str(mean(tracklength))]);
@@ -293,6 +293,7 @@ for i=1:max(res_filt(:,4))
 end
 
     title(['All tracks longer than ',num2str(min_length) ' frames']);
+    box on; axis square;
     xlabel('pxl');
     ylabel('pxl');
    
@@ -316,16 +317,16 @@ end
 
 cd(pathR);
 
-filenameMSD=['Tracks_MSD_' filename_peaks];
+filenameMSD=['Tracks_MSD_' name_base '.m'];
 save(filenameMSD,'tracks');
 
 fprintf('\n -- Done. Generated tracks for @msdanalyzer --\n')
 
 % Export tracks as input for Hoze/inferenceMap
 
-filenamec1=['Tracks_XYTID_' filename_peaks];
-filenamec2=['Tracks_Hoze_' filename_peaks '.txt'];
-filenamec3=['Tracks_InferenceMap_' filename_peaks '.trxyt'];
+filenamec1=['Tracks_XYTID_' name_base '.m'];
+filenamec2=['Tracks_Hoze_' name_base '.txt'];
+filenamec3=['Tracks_InferenceMap_' name_base '.trxyt'];
 
 cd(pathR);
 

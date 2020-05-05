@@ -1,4 +1,4 @@
-%% calculate MSD and D
+%% Calculate MSD and D
 
 % Author: Christian Sieben, EPFL 
 % sieben.christian@gmail.com
