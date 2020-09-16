@@ -1,27 +1,25 @@
-%% Analyze dye photophysics from SMLM data (tracking part)
+%% Grouping/merging by using 
 % 
-% Author: Christian Sieben, EPFL 
+% Author: Christian Sieben, HZI 
 % sieben.christian@gmail.com
-% April 2020
+% Sep 2020
 
-% 1. Load sample data
-% 2. Track with Gap 0
-% 3. Group/Merge the tracks (2D)
-% 4. Track with Gap max(frames)
+% 1.    Load Locs
+% 2.    Define grouping parameters, perfomr grouping
+% 3. 	Merge and save localizations
 
 clear, clc, close all
 
 SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial'; % for relative path
 
-%% 1. Load sample data 
+%% 1. Load locs
 
 cd([SMLM_tutorial_main '/example_data/photophysics/A647']);
 
-% filename = 'HAmOrange_NB_41_1_locs_ROI.csv';
 filename = 'A647_COT_1200mW_10ms_3_MMStack_1_Localizations_DC_Z';
 locs = dlmread([filename '.csv'],',',1,0);
 
-% Find the respective Columns
+% Find the respective columns
 
 file   = fopen([filename '.csv']); % csv for TS
 header = fgetl(file);
@@ -46,46 +44,42 @@ framesCol           = strmatch('frame',header);
 LLCol               = strmatch('loglikelihood',header);
 uncertaintyCol      = strmatch('uncertainty [nm]',header);
 
-fprintf('\n -- Data loaded --\n')
 
-%% 2. Track with Gap 0
-%  track with a gap of 0 frames to combine blinking events
-
-max_disp = 50; % maximum displacement in unit of data
-gap      = 0;  % number of time steps that a particle can be 'lost' and then recovered again
-min_pos  = 1;  % eliminate if fewer than min_pos good valid positions
-quiet    = 1;  % no text
+fprintf('\n -- 1. Data loaded --\n')
 
 
-pos_list(:,1) = locs(:,xCol);                   % in pxl
-pos_list(:,2) = locs(:,yCol);                   % in pxl
+%% 2. Perform grouping 
+
+% Set the grouping parameters
+
+max_disp = 30;    % maximum displacement, e.g.2*sigma
+gap      = 2000;  % number of time steps that a particle can be 'lost' and then recovered again, e.g.  mean dark time
+min_pos  = 1;     % eliminate if fewer than min_pos good valid positions
+quiet    = 1;     % no text
+
+pos_list(:,1) = locs(:,xCol);                   % in nm
+pos_list(:,2) = locs(:,yCol);                   % in nm
 pos_list(:,3) = locs(:,photonsCol);             % photons
 pos_list(:,4) = locs(:,uncertaintyCol);         % uncertainty
-pos_list(:,5) = locs(:,framesCol);              % dt in seconds
-
+pos_list(:,5) = locs(:,framesCol);              % frames
 
 param = struct('mem',gap,'dim',2,'good',min_pos,'quiet',quiet);
 res   = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
 
-fprintf('\n -- Tracking Done --\n')
+fprintf('\n -- 2. Tracking Done --\n')
 
-%% 3. Group/Merge the tracks (2D)
+%% 3. Merge localizations
 
-% Initialize Variable for grouped locs
+% Initialize Variables for grouped locs
 
 groupedx = []; groupedy = []; frame    = [];
 groupedframe = []; groupedPhotons = []; groupedUncertainty=[];
 
-% Photons = [];
-% Uncertainty = [];
-% subsetLL = [];
-
-
-for index=1:max(res(:,end)); 
+for index = 1:max(res(:,end)); % for all tracks 
     
             vx = find(res(:,end)==index); % find the track ID
             
-            if length(vx)<300 ; % select only tracks short tham 300 locs
+            if length(vx)<300 ; % select only tracks short tham 300 locs, to filter Au fiducials
             
             groupedx            = vertcat(groupedx,sum(res(res(:,6)==index,1))/length(res(res(:,6)==index,1)));
             groupedy            = vertcat(groupedy,sum(res(res(:,6)==index,2))/length(res(res(:,6)==index,2)));
@@ -99,35 +93,14 @@ end
 locs_grouped = [];
 locs_grouped = [groupedx, groupedy, groupedPhotons, groupedUncertainty, groupedframe];
 
-save(['Tracks_Gap0_Merged_' filename],'locs_grouped');
+% Plot figure to visualize before/after merging
 
-fprintf('\n -- 3. Tracks Merged and Saved --\n')
+figure
+scatter(locs(:,xCol), locs(:,yCol),'b.'); hold on;
+scatter(locs_grouped(:,1), locs_grouped(:,2),15,'r')
 
-%% 3. Tracking with Gap max(frames)
+% Save merged localizations
 
-% Set the grouping parameters
+save(['Locs_Merged_' filename],'locs_grouped');
 
-max_disp = 50; % maximum displacement in unit of data
-gap      = max(locs_grouped(:,5));  % number of time steps that a particle can be 'lost' and then recovered again
-min_pos  = 1;  % eliminate if fewer than min_pos good valid positions
-quiet    = 1;  % no text
-
-pos_list = [];
-
-pos_list(:,1) = locs_grouped(:,1); % x
-pos_list(:,2) = locs_grouped(:,2); % y
-pos_list(:,3) = locs_grouped(:,3); % Photons
-pos_list(:,4) = locs_grouped(:,4); % Uncertainty
-pos_list(:,5) = locs_grouped(:,5); % Frame
-
-pos_list = sortrows(pos_list,5);
-
-param   = struct('mem',gap,'dim',2,'good',min_pos,'quiet',quiet);
-res     = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
-
-fprintf('\n -- Tracking Done --\n')
-
-save([filename '_tracks_GapMax' ],'res');
-
-fprintf('\n -- 3. Tracks Saved --\n')
-
+fprintf('\n -- 3. Locs Merged and Saved --\n')

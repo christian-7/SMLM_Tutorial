@@ -28,7 +28,9 @@ SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial';
 % res5 = frame
 % res6 = track ID
 
+load('A647_COT_1200mW_10ms_3_MMStack_1_Localizations_DC_Z_tracks_GapMax.mat')
 all_tracks = res;
+
 %% 2. Calculate Track length
 
 %%%%%%%%%%%%
@@ -59,7 +61,6 @@ figure('Position',[100 500 300 300],'name','Track length histogram')
 bar(binCenters,x/sum(x));hold on;
 axis([-5 50 0 0.9]);
 title(['Mean = ', num2str(mean(tracklength))]);
-% xlabel('Nbr of blinks');
 xlabel('on time (frames)');
 ylabel('norm counts')
 
@@ -297,20 +298,25 @@ x=transpose(hist(allgaps,binCenters));
 
 
 figure
-bar(binCenters,x/max(x));ax = gca;
+bar(binCenters,x/max(x));
+ax = gca;
 ax.YScale = 'log'
+title(['Mean = ', num2str(mean(allgaps))]);
 xlabel('Off time [frames]');
 ylabel('norm counts');
 hold on
 
-% 
-% figure
-% hist(allgaps,10);
-% title(['Mean = ', num2str(mean(allgaps))]);
+
 % 
 % 
 % ft = fittype('exp1');
-% [gapfit, gof] = fit(binCenters,x,'exp1');
+% [gapfit, gof] = fit(x/max(x),transpose(binCenters),'exp1');
+% 
+% f = fit(x/max(x),transpose(binCenters),'exp1');
+% plot(f,x/max(x),transpose(binCenters));
+% ax = gca;
+% ax.YScale = 'log'
+% 
 % save('gap.mat','gapfit','ft','gof','binCenters','x')
 % 
 % [CdfY,CdfX] = ecdf(allgaps,'Function','cdf'); 
