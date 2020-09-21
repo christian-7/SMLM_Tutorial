@@ -17,12 +17,12 @@
 
 clear, close all, clc, clear
 
-pathd = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos');            % Data path
-pathR = ('/Volumes/Transcend/data_PALM/2020-03-05_M1_mEos/analysis');   % Results path
+pathd = ('/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/locResults');            % Data path
+pathR = ('/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/analysis');   % Results path
 
-imageID = 4;
+imageID = 2;
 
-name_base = ['A549_M1mEosC1_447_gain300_30ms_00' num2str(imageID)];
+name_base = ['HEK_gain300_20ms_37deg_PCglas_Cell' num2str(imageID)];
 
 pxl_size    = 160;  % nm
 time_step   = 0.03; % in sec
@@ -138,7 +138,7 @@ im      = hist3([pos_list(:,1),pos_list(:,2)],[width heigth]); % heigth x width
 rect = [];
 
 figure('Position',[100 200 600 600],'Name','Select ROI for tracking')
-imagesc(imrotate(im,90),[0 50]);
+imagesc(imrotate(im,90),[0 10]);
 title('Please select ROI');
 xlabel('x [pxl]');
 ylabel('y [pxl]');
@@ -178,8 +178,8 @@ ylabel('y [pxl]');
 % quiet - 1 = no text
 
 tic
-param   = struct('mem',4,'dim',2,'good',1,'quiet',1);
-res     = trackGT(ROIselect,2,param); % variable XYT, maximum displacement in unit of data
+param   = struct('mem',2,'dim',2,'good',1,'quiet',1);
+res     = trackGT(ROIselect,1,param); % variable XYT, maximum displacement in unit of data
 
 fprintf('\n -- Tracking done in %f sec--\n',toc)
 
@@ -194,7 +194,7 @@ fprintf('\n -- Tracking done in %f sec--\n',toc)
 
 close all, clc
 
-min_length  = 10;
+min_length  = 5;
 max_length  = 100; % max(peaks(:,frame))/10;
 res_filt    = []; count = 0; track = [];
 
@@ -293,7 +293,7 @@ for i=1:max(res_filt(:,4))
 end
 
     title(['All tracks longer than ',num2str(min_length) ' frames']);
-    box on; axis square;
+    box on; axis square; axis equal;
     xlabel('pxl');
     ylabel('pxl');
    

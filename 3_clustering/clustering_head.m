@@ -8,20 +8,30 @@
 % 2. Calculate Ripley's K statistics
 % 3. Perform Ripley's K clustering
 
+% Ripleys K
+% This approach compares the measured distribution of single-molecule localizations to a simulated random distribution, and provides information whether clustering occurs. 
+% The maximum of the H function reflects the average size of clusters. 
+% The amplitude of the H-function is a measure of the degree of clustering. 
+% The variance of the amplitude reflects the variance of the spatial organization of proteins within a cluster.
+
+
 clear, clc, close all
 SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial';
 
 %% 1. Load sample data
 
-cd([SMLM_tutorial_main '/example_data/clustering']);
+% cd([SMLM_tutorial_main '/example_data/clustering']);
+% filename = 'A549_EGFR_Co_800ms_10ms_3_MMStack_locResults.dat';
 
-% filename = 'HAmOrange_NB_41_1_locs_ROI.csv';
-filename = 'A549_EGFR_Co_800ms_10ms_3_MMStack_locResults.dat';
-locs=dlmread(filename,',',1,0);
+folder = '/Volumes/Transcend/Inflammasome/new_locResults/2020-03-03_CS_Inflammasome/locResults_T100/Sample1_Unstimulated_18_1';
+cd(folder)
+filename = 'Sample1_Unstimulated_18_1_MMStack_1_Localizations';
+
+locs=dlmread([filename '.csv'],',',1,0);
 
 % Find the respective Columns
 
-file = fopen(filename); % csv for TS
+file = fopen([filename '.csv']); % csv for TS
 header = fgetl(file);
 header = regexp(header, ',', 'split');
 
@@ -35,14 +45,14 @@ LLCol               = strmatch('"loglikelihood"',header);
 xCol                = strmatch('x [nm]',header);
 yCol                = strmatch('y [nm]',header);
 zCol                = strmatch('z [nm]',header);
-photonsCol          = strmatch('intensity [photons]',header);
+photonsCol          = strmatch('intensity [photon]',header);
 framesCol           = strmatch('frame',header);
 LLCol               = strmatch('loglikelihood',header);
 
 
 fprintf('\n -- Data loaded --\n')
 
-%% 2. Peform DBSCAN clustering
+%% 2. Peform DBSCAN clustering (with manual ROI)
 
 cd([SMLM_tutorial_main '/3_clustering']);
 
@@ -53,14 +63,17 @@ Eps     = 50;
 
 [subset, FiC, CpA, LpC] = DBSCAN_with_ROI(locs, xCol, yCol, pxlsize, k, Eps);
 
-%% 3. Calculate Ripley's K statistics
+%% 3. Calculate Ripley's K statistics (with manual ROI)
+% Generate loc file for LAMA *_Lama.txt
+
+close all
 
 [locs_ROI] = manualROI(locs,xCol,yCol,200);
 
 ROI     = [min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) ... 
            min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))];
 
-maxk    = 300;    % maximum distance
+maxk    = 1000;    % maximum distance
 stepk   = 10;     % step size
 
 [K, K_rand] = calculateRipleysK(locs_ROI, xCol, yCol, ROI, maxk, stepk);
@@ -95,10 +108,52 @@ plot(K(:,1),M,'b');hold on
 plot(K_rand(:,1),M_rand,'r');hold on
 ylabel('K(r)/(\pi*r^2)'); box on; axis square; xlabel('distance [nm]');
 
-%% 4. Local linearised Ripley's K density estimator
-% Code provided by Juliette Griffie, EPFL (see Lr.m)
+% cd(folder)
+% saveAsMALK(locs_ROI,xCol, yCol, framesCol, photonsCol,filename)
+
+%% 4. Calculate Ripley's K and L statistics (with manual ROI)
+
+% Code from: Shivanandan A, et al (2015) PLOS ONE 10(3): e0118767. https://doi.org/10.1371/journal.pone.0118767
+% https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118767
+
+close all
+
+radius = 5:5:500;
 
 [locs_ROI] = manualROI(locs,xCol,yCol,200);
+
+ROI     = [min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) ... 
+           min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))];
+
+ROI_cropped = find(locs_ROI(:,xCol)>ROI(1)+max(radius) & locs_ROI(:,xCol)<ROI(2)-max(radius) & ...
+                   locs_ROI(:,yCol)>ROI(3)+max(radius) & locs_ROI(:,yCol)<ROI(4)-max(radius));
+
+
+[TrueLrr, TrueK] = calculateLKfunction(locs_ROI(:,1:2), radius);
+
+[max_value,index] = max(TrueLrr)
+
+figure('Position',[100 400 600 300])
+
+subplot(1,2,1)
+plot(radius,TrueK,'-b');hold on
+ylabel('K(r)'); box on; axis square; xlabel('distance [nm]');
+
+subplot(1,2,2)
+plot(radius,TrueLrr,'b');hold on
+title(['Maximum at ' num2str(max(radius(index))) ' nm'])
+ylabel('L(r)-r');box on; axis square; xlabel('distance [nm]');
+
+Var1(:,1) = radius;
+Var1(:,3) = TrueLrr;
+
+% cd(folder)
+% saveAsMALK(locs_ROI,xCol, yCol, framesCol, photonsCol, [filename '_ROI2_'])
+
+%% 5. Local linearised Ripley's K density estimator
+% Code provided by Juliette Griffie, EPFL (see Lr.m)
+
+% [locs_ROI] = manualROI(locs,xCol,yCol,200);
 
 ROI     = [min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) ... 
            min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))];
@@ -132,10 +187,12 @@ figure('Position',[400 400 300 300])
 scatter(locs_ROI_cropped(:,1),locs_ROI_cropped(:,2),5, L,'filled')
 axis square;box on; hold on; xlabel('x (nm)'); ylabel('y (nm)');
 
-%% 5. Calculate L Curve (same ROI as 4)
+%% 6. Calculate L Curve (same ROI as 4)
 % Code provided by Juliette Griffie, EPFL (see Lr.m)
 
-radius = 5:5:1000;
+radius = 5:5:500;
+
+[locs_ROI] = manualROI(locs,xCol,yCol,200);
 
 ROI_cropped = find(locs_ROI(:,xCol)>ROI(1)+max(radius) & locs_ROI(:,xCol)<ROI(2)-max(radius) & ...
                    locs_ROI(:,yCol)>ROI(3)+max(radius) & locs_ROI(:,yCol)<ROI(4)-max(radius));
@@ -165,9 +222,11 @@ for i=1:size(radius,2)
 end
 
 radius = [0,radius];
+[max_value,index]=max(TrueLrr);
 
 figure('Position',[400 400 300 300])
 plot(radius,L_curves);
 box on
 axis square
 xlabel('radius (nm)'); ylabel('L(r)-r')
+title(['Maximum at ' num2str(max(radius(index))) ' nm'])

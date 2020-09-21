@@ -1,6 +1,6 @@
-path 	= "Z:/2020-03-05_M1_mEos/";
-respath = "Z:\\2020-03-05_M1_mEos\\analysis\\";
-name 	= "A549_M1mEosC1_448_gain300_30ms_004";
+path 	= "/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/"; 
+respath = "/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/locResults/";
+name 	= "HEK_gain300_20ms_37deg_PCglas_Cell3";
 
 run("Bio-Formats Importer", "open="+path+name+".nd2");
 
@@ -9,7 +9,8 @@ run("16-bit");
 saveAs("Tiff",respath+"STD_"+name+".tif");
 close();
 
-selectWindow(path+name+".nd2");
+// selectWindow(path+name+".nd2");
+selectWindow(name+".nd2");
 
 run("Camera setup", "offset=100.0 quantumefficiency=0.9 isemgain=true photons2adu=6.0"+ 
 	"gainem=300.0 pixelsize=160.0");
