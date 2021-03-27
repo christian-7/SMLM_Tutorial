@@ -20,7 +20,7 @@ clear, close all, clc, clear
 pathd = ('/Users/csi20/Documents/Transcend/data_PALM/2020-03-05_M1_mEos/');            % Data path
 pathR = ('/Users/csi20/Documents/Transcend/data_PALM/2020-03-05_M1_mEos/analysis/');   % Results path
 
-imageID = 2;
+imageID = 4;
 
 name_base = ['A549_M1mEosC1_447_gain300_30ms_00' num2str(imageID)];
 
@@ -66,7 +66,7 @@ NoNind      = [];
 %%%%% Filter
 
 
-min_int     = 30;   % min photons
+min_int     = 20;   % min photons
 min_sigma   = 100;  % min sigma
 max_sigma   = 300;  % max sigma
 
@@ -323,8 +323,8 @@ end
 
 cd(pathR);
 
-filenameMSD = ['Tracks_MSD_' name_base '.m'];
-% save(filenameMSD,'tracks');
+filenameMSD=['Tracks_MSD_' name_base '.m'];
+save(filenameMSD,'tracks');
 
 fprintf('\n -- Done. Generated tracks for @msdanalyzer --\n')
 
@@ -347,13 +347,13 @@ save(filenamec1,'res_filt');
 
 % For N. Hoze Script
 
-% forHoze=[];
-% forHoze(:,1)=res_filt(:,4);                 % index
-% forHoze(:,2)=res_filt(:,3)*time_step;       % time in sec
-% forHoze(:,3)=res_filt(:,1)*pxl_size/1e3;    % X in um
-% forHoze(:,4)=res_filt(:,2)*pxl_size/1e3;    % Y in um
-% 
-% dlmwrite(filenamec2,forHoze);
+forHoze=[];
+forHoze(:,1)=res_filt(:,4);                 % index
+forHoze(:,2)=res_filt(:,3)*time_step;       % time in sec
+forHoze(:,3)=res_filt(:,1)*pxl_size/1e3;    % X in um
+forHoze(:,4)=res_filt(:,2)*pxl_size/1e3;    % Y in um
+
+dlmwrite(filenamec2,forHoze);
 
 % For InferenceMap
 

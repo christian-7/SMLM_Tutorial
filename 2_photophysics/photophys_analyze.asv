@@ -5,12 +5,12 @@
 % April 2020
 
 % 1.    Load Tracks
-% 2.    On time distribution
-% 3.    Number of blinks
-% 4.1   Calculate Track Spread (i.e. sigma)
-% 4.2   Calculate gaussian PDF of x and y dimensions (overlay all molecules)
-% 4.3   Calculate gaussian PDF of x and y dimensions (individual molecules)
-% 5.    Find Gaps and measure length --> Dark time
+
+% 2.    Calculate Track length
+% 3.1   Calculate Track Spread (i.e. sigma)
+% 3.2   Calculate gaussian PDF of x and y dimensions (overlay all molecules)
+% 3.3   Calculate gaussian PDF of x and y dimensions (individual molecules)
+% 4.    Find Gaps and measure length --> Dark time
 
 clear, clc, close all
 SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial';
@@ -58,10 +58,10 @@ end
 binCenters = 0:5:50;
 x = transpose(hist(tracklength,binCenters)); 
 
-figure('Position',[100 500 300 300],'name','On time distribution') 
+figure('Position',[100 500 300 300],'name','Track length histogram') 
 bar(binCenters,x/sum(x));hold on;
 axis([-5 50 0 0.9]);
-title(['Mean = ', num2str(mean(tracklength)) ' frames']);
+title(['Mean = ', num2str(mean(tracklength))]);
 % xlabel('on time (frames)');
 xlabel('On time [frames]');
 ylabel('norm counts'); 
@@ -94,7 +94,7 @@ end
 binCenters = 0:5:50;
 x = transpose(hist(tracklength,binCenters)); 
 
-figure('Position',[100 500 300 300],'name','Number of blinks') 
+figure('Position',[100 500 300 300],'name','Track length histogram') 
 bar(binCenters,x/sum(x));hold on;
 axis([-5 50 0 0.9]);
 title(['Mean = ', num2str(mean(tracklength))]);
@@ -104,8 +104,8 @@ ylabel('norm counts');
 axis square;
 
 
-%% 4.1 Calculate Track Spread (i.e. sigma)
-%  4.1 can be used to make a figure visualizing sigma
+%% 3.1 Calculate Track Spread (i.e. sigma)
+%  3.1 can be used to make a figure visualizing sigma
 
 %%%%%%%%%%%%
 % The lateral spread of localizations (i.e. sigma)

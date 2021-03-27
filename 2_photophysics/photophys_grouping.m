@@ -53,7 +53,7 @@ fprintf('\n -- 1. Data loaded --\n')
 % Set the grouping parameters
 
 max_disp = 30;    % maximum displacement, e.g.2*sigma
-gap      = 2000;  % number of time steps that a particle can be 'lost' and then recovered again, e.g.  mean dark time
+gap      = 1344;  % number of time steps that a particle can be 'lost' and then recovered again, e.g.  mean dark time
 min_pos  = 1;     % eliminate if fewer than min_pos good valid positions
 quiet    = 1;     % no text
 

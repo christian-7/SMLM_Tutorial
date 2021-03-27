@@ -16,7 +16,6 @@ SMLM_tutorial_main = '/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial'; % for
 
 cd([SMLM_tutorial_main '/example_data/photophysics/A647']);
 
-% filename = 'HAmOrange_NB_41_1_locs_ROI.csv';
 filename = 'A647_COT_1200mW_10ms_3_MMStack_1_Localizations_DC_Z';
 locs = dlmread([filename '.csv'],',',1,0);
 
@@ -35,7 +34,7 @@ photonsCol          = strmatch('"intensity [photons]"',header);
 framesCol           = strmatch('"frame"',header);
 LLCol               = strmatch('"loglikelihood"',header);
 
-% Fangs format
+% Fangs format 
 
 xCol                = strmatch('x [nm]',header);
 yCol                = strmatch('y [nm]',header);
@@ -47,8 +46,13 @@ uncertaintyCol      = strmatch('uncertainty [nm]',header);
 
 fprintf('\n -- Data loaded --\n')
 
+figure
+scatter(locs(:,xCol),locs(:,yCol),'.');
+axis square, box on
+
 %% 2. Track with Gap 0
-%  track with a gap of 0 frames to combine blinking events
+%  track with a gap of 0 frames to combine blinking events spread over
+%  several frames
 
 max_disp = 50; % maximum displacement in unit of data
 gap      = 0;  % number of time steps that a particle can be 'lost' and then recovered again
@@ -64,7 +68,9 @@ pos_list(:,5) = locs(:,framesCol);              % dt in seconds
 
 
 param = struct('mem',gap,'dim',2,'good',min_pos,'quiet',quiet);
-res   = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
+res_gap0   = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
+
+save([filename '_tracks_Gap0'],'res_gap0');
 
 fprintf('\n -- Tracking Done --\n')
 
@@ -79,17 +85,17 @@ groupedframe = []; groupedPhotons = []; groupedUncertainty=[];
 % Uncertainty = [];
 % subsetLL = [];
 
-for index=1:max(res(:,end)); 
+for index=1:max(res_gap0(:,end)); 
     
-            vx = find(res(:,end)==index); % find the track ID
+            vx = find(res_gap0(:,end)==index); % find the track ID
             
             if length(vx)<300 ; % select only tracks short tham 300 locs
             
-            groupedx            = vertcat(groupedx,sum(res(res(:,6)==index,1))/length(res(res(:,6)==index,1)));
-            groupedy            = vertcat(groupedy,sum(res(res(:,6)==index,2))/length(res(res(:,6)==index,2)));
-            groupedframe        = vertcat(groupedframe, round(mean(res(res(:,6)==index,5))));
-            groupedPhotons      = vertcat(groupedPhotons, sum(res(res(:,6)==index,3)));
-            groupedUncertainty  = vertcat(groupedUncertainty, mean(res(res(:,6)==index,4)));
+            groupedx            = vertcat(groupedx,sum(res_gap0(res_gap0(:,6)==index,1))/length(res_gap0(res_gap0(:,6)==index,1)));
+            groupedy            = vertcat(groupedy,sum(res_gap0(res_gap0(:,6)==index,2))/length(res_gap0(res_gap0(:,6)==index,2)));
+            groupedframe        = vertcat(groupedframe, round(mean(res_gap0(res_gap0(:,6)==index,5))));
+            groupedPhotons      = vertcat(groupedPhotons, sum(res_gap0(res_gap0(:,6)==index,3)));
+            groupedUncertainty  = vertcat(groupedUncertainty, mean(res_gap0(res_gap0(:,6)==index,4)));
             
             else end % else its a bead
 end
@@ -97,11 +103,12 @@ end
 locs_grouped = [];
 locs_grouped = [groupedx, groupedy, groupedPhotons, groupedUncertainty, groupedframe];
 
-% save(['Tracks_Gap0_Merged_' filename],'locs_grouped');
+% save([filename '_tracks_Gap0_Merged'],'locs_grouped');
 
 fprintf('\n -- 3. Tracks Merged and Saved --\n')
 
 %% 3. Tracking with Gap max(frames)
+%  track with a gap of max frames to combine blinking events into molecules
 
 % Set the grouping parameters
 
@@ -121,11 +128,11 @@ pos_list(:,5) = locs_grouped(:,5); % Frame
 pos_list = sortrows(pos_list,5);
 
 param   = struct('mem',gap,'dim',2,'good',min_pos,'quiet',quiet);
-res     = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
+res_gapMax     = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement in pxl
 
 fprintf('\n -- Tracking Done --\n')
 
-% save([filename '_tracks_GapMax' ],'res');
+save([filename '_tracks_GapMax' ],'res_gapMax');
 
 fprintf('\n -- 3. Tracks Saved --\n')
 
