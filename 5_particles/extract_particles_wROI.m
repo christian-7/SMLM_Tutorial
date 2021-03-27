@@ -2,18 +2,18 @@
 clear, clc, close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-IM_number = 18;
+IM_number = 32;
 
-fitting_dist        = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial/localizations';
+fitting_dist        = '/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial/common_functions';
 
-Locpath1            = ['/Volumes/Christian-Sieben/data_HTP/2019-04-02_Inflammasome_3D_ASC_speck_Ab/locResults_Feng/THP_1_' num2str(IM_number) '_1'];
-locName1            = ['THP_1_' num2str(IM_number) '_1_MMStack_1_Localizations_Z'];
+Locpath1            = ['/Users/csi20/Documents/Transcend/Inflammasome/new_locResults/2020-05-14_Inflammasome_1C_3D_NB/locResults_Fang_3D/Sample3_Cas1KO_LPS_Nig_' num2str(IM_number) '_1'];
+locName1            = ['Sample3_Cas1KO_LPS_Nig_' num2str(IM_number) '_1_MMStack_1_Localizations_Z'];
 
-WFpath              = ['/Volumes/Christian-Sieben/data_HTP/2019-04-02_Inflammasome_3D_ASC_speck_Ab/THP_1_WF' num2str(IM_number)];
-WFname              = ['THP_1_WF' num2str(IM_number) '_MMStack_Pos0.ome.tif'];
+WFpath              = ['/Volumes/Seagate Expansion Drive/Christian_lebpc4/Inflammasome_backup/2020-05-14_Inflammasome_1C_3D_NB/Sample3_Cas1KO_LPS_Nig_WF' num2str(IM_number)];
+WFname              = ['Sample3_Cas1KO_LPS_Nig_WF' num2str(IM_number) '_MMStack_Pos0.ome.tif'];
 
-resultsFolder       = ['/Volumes/Transcend/Inflammasome/2020-03-02_CS_Inflammasome_3D_Ab'];
-resultsFile         = '2019-04-02_CS_Inflammasome_3D_Ab_Fang_Particles_w_clusters.mat';
+resultsFolder       = ['/Users/csi20/Documents/Transcend/Inflammasome/new_locResults/2020-05-14_Inflammasome_1C_3D_NB'];
+resultsFile         = '2020-05-14_Inflammasome_1C_3D_NB_Fang_Particles_w_clusters.mat';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -256,18 +256,20 @@ close all
 
 %% Filter localizations
 
+% locs_DC = locs;
+
 minFrame            = 1000;
 maxFrame            = max(locs(:,framesCol));
 MinPhotons          = 1000;
 MaxPhotons          = 100000;
 MaxLL               = -500;
-z_min               = -800;
-z_max               = 500;
+z_min               = -1000;
+z_max               = 1000;
 BG_max              = 100; 
         
 filter              = [];
 filter              = find(locs_DC(:,photonsCol) > MinPhotons & locs_DC(:,photonsCol) < MaxPhotons & locs_DC(:,LLCol) > MaxLL ... 
-                         & locs_DC(:,framesCol) > minFrame & locs_DC(:,4) > z_min & locs_DC(:,4) < z_max & locs_DC(:,BG_col) < BG_max ...
+                         & locs_DC(:,framesCol) > minFrame & locs_DC(:,4) > z_min & locs_DC(:,4) < z_max ... %& locs_DC(:,BG_col) < BG_max ...
                          & locs_DC(:,framesCol) < maxFrame);
                      
 locsFilt            = locs_DC(filter,1:end);
@@ -278,7 +280,7 @@ display(['Localizations filtered (' num2str(length(locsFilt)/length(locs_DC)) ' 
 
 %% Out 1a. Extract particle locs in ROI
 
-cd('/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial/Particles')
+cd('/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial/1_general_SMLM')
 
 figure('Position',[50 500 400 400])
 imagesc(flipud(WF_image),[0 10*median(WF_image(:))]);hold on;
@@ -305,7 +307,7 @@ fprintf('\n -- Out 1 Particle locs extracted -- \n')
 % fig = imshow(WF_image)
 figure
 imagesc(WF_image,[0 10*median(WF_image(:))]);hold on;
-[xi,yi] = getpts
+h = drawpoint; xi = h.Position(1); yi = h.Position(2)
 
 croppedWF = imcrop(WF_image,[xi-25 yi-25 50 50]);
 % imshow(croppedWF)
@@ -318,7 +320,7 @@ fprintf('\n -- Out 2 WF image cropped -- \n')
 
 %% Out 3. DBSCAN with ROI
 
-cd('/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial/localizations');
+cd('/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial/3_clustering');
 
 [subset, LpA, CpA, LpC] = DBSCAN_with_ROI(locs_DC,xCol, yCol, 200, 5, 50);
  
@@ -326,9 +328,9 @@ cd('/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial/localizations');
 % Locs per area
 
 ParticlesTemp{size(ParticlesTemp, 1),3} = subset;
-ParticlesTemp{size(ParticlesTemp, 1),4} = LpC; % locs per cluster
-ParticlesTemp{size(ParticlesTemp, 1),5} = CpA; % clusters per area/ µm2
-ParticlesTemp{size(ParticlesTemp, 1),6} = IM_number; % Image ID
+ParticlesTemp{size(ParticlesTemp, 1),4} = LpC;          % locs per cluster
+ParticlesTemp{size(ParticlesTemp, 1),5} = CpA;          % clusters per area/ µm2
+ParticlesTemp{size(ParticlesTemp, 1),6} = IM_number;    % Image ID
 
 fprintf('\n -- 3 Cytoplasm clustered -- \n')
 

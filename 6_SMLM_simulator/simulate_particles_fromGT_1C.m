@@ -1,13 +1,13 @@
 %% Generate library of rotated centrioles
 
-clear; clc; close all; 
+% clear; clc; close all; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-num_of_structures   = 2;
+num_of_structures   = 1;
                                                                             % Set simulation parameters                                                           
-labelling_eff       = 0.4;
+labelling_eff       = 1;
 nframes             = 20e3;
 minNoise            = -200; 
 maxNoise            = 200;
@@ -16,11 +16,10 @@ noise_mol           = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-cd('/Users/christian/Documents/Arbeit/MatLab/centriole_sim'); 
-load('NineFold.mat'); 
+% cd('/Users/christian/Documents/Arbeit/MatLab/centriole_sim'); 
+% load('NineFold.mat'); 
 
-ptCloud  = ptCloud;
-
+ptCloud  = ptCloudOut;
 
 a = [1, 0, 0, 0]; % initial vector
 
@@ -126,6 +125,7 @@ ID = randi([1 num_of_structures],1,1);
 
 subplot(1,2,1)
 scatter3(sim_cent{ID, 1}(:,1),sim_cent{ID, 1}(:,2),sim_cent{ID, 1}(:,3),10,'filled');
+
 axis([-300 300 -300 300])
 view([50,60])
 % axis equal
@@ -192,7 +192,7 @@ width  = round((max(simCent_wNoise{ID, 1}(:,2)) - min((simCent_wNoise{ID, 1}(:,2
 rendered = hist3([simCent_wNoise{ID, 1}(:,2),simCent_wNoise{ID, 1}(:,1)],[heigth width]);
 
 subplot(1,3,3)
-imshow(imgaussfilt(rendered,1));
+imshow(imgaussfilt(rendered,1),[0 10]);
 colormap(gca,hot)
 title(['pxl size = ' num2str(pxlsize)]);
 

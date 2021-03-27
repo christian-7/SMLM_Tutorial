@@ -23,7 +23,7 @@ SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial';
 % cd([SMLM_tutorial_main '/example_data/clustering']);
 % filename = 'A549_EGFR_Co_800ms_10ms_3_MMStack_locResults.dat';
 
-folder = '/Volumes/Transcend/Inflammasome/new_locResults/2020-03-03_CS_Inflammasome/locResults_T100/Sample1_Unstimulated_18_1';
+folder = '/Volumes/Seagate Expansion Drive/Christian_lebpc4/Inflammasome_backup/2020-03-03_CS_Inflammasome/locResultsTresh100/Sample1_Unstimulated_18_1';
 cd(folder)
 filename = 'Sample1_Unstimulated_18_1_MMStack_1_Localizations';
 
@@ -144,8 +144,8 @@ plot(radius,TrueLrr,'b');hold on
 title(['Maximum at ' num2str(max(radius(index))) ' nm'])
 ylabel('L(r)-r');box on; axis square; xlabel('distance [nm]');
 
-Var1(:,1) = radius;
-Var1(:,3) = TrueLrr;
+% Var1(:,1) = radius;
+% Var1(:,3) = TrueLrr;
 
 % cd(folder)
 % saveAsMALK(locs_ROI,xCol, yCol, framesCol, photonsCol, [filename '_ROI2_'])
@@ -153,7 +153,7 @@ Var1(:,3) = TrueLrr;
 %% 5. Local linearised Ripley's K density estimator
 % Code provided by Juliette Griffie, EPFL (see Lr.m)
 
-% [locs_ROI] = manualROI(locs,xCol,yCol,200);
+[locs_ROI] = manualROI(locs,xCol,yCol,200);
 
 ROI     = [min(locs_ROI(:,xCol)) max(locs_ROI(:,xCol)) ... 
            min(locs_ROI(:,yCol)) max(locs_ROI(:,yCol))];

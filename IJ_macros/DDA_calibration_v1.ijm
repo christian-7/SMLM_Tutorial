@@ -1,7 +1,8 @@
 run("Clear Results");
 run("Set Measurements...", "integrated redirect=None decimal=3");
 
-// 16 um / 40x / 1.6 = 0.25 um --> scale 5x = 50 nm
+// 16 µm / 40x / 1.6 = 0.25 µm --> scale 5x = 50 nm
+// 6.45 µm / 40x / 0.16 µm --> scale 5x = 32 nm
 
 direction 	= -1 	// 1 -> move up (cell is above) ; -1 -> move down (cell is below)
 step 		= 5 	// step in pxl
@@ -17,7 +18,7 @@ roiManager("add");
 for (p = 0; p < distance; p = p+step) {
 wait(100);
 roiManager("Select", 1);
-roiManager("translate",0 , step*direction);
+roiManager("translate",0 , step*direction*-1);
 run("Measure");
 };
 
@@ -34,7 +35,7 @@ run("Clear Results");
 for (p = 0; p < distance; p = p+step) {
 wait(100);
 roiManager("Select", 0);
-roiManager("translate", 0, step*direction);
+roiManager("translate", 0, step*direction*-1);
 run("Measure");
 };
 

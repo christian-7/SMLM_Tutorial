@@ -10,8 +10,7 @@
 % 4. Track with Gap max(frames)
 
 clear, clc, close all
-
-SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial'; % for relative path
+SMLM_tutorial_main = '/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial'; % for relative path
 
 %% 1. Load sample data 
 
@@ -80,7 +79,6 @@ groupedframe = []; groupedPhotons = []; groupedUncertainty=[];
 % Uncertainty = [];
 % subsetLL = [];
 
-
 for index=1:max(res(:,end)); 
     
             vx = find(res(:,end)==index); % find the track ID
@@ -99,7 +97,7 @@ end
 locs_grouped = [];
 locs_grouped = [groupedx, groupedy, groupedPhotons, groupedUncertainty, groupedframe];
 
-save(['Tracks_Gap0_Merged_' filename],'locs_grouped');
+% save(['Tracks_Gap0_Merged_' filename],'locs_grouped');
 
 fprintf('\n -- 3. Tracks Merged and Saved --\n')
 
@@ -107,10 +105,10 @@ fprintf('\n -- 3. Tracks Merged and Saved --\n')
 
 % Set the grouping parameters
 
-max_disp = 50; % maximum displacement in unit of data
+max_disp = 50;                      % maximum displacement in unit of data
 gap      = max(locs_grouped(:,5));  % number of time steps that a particle can be 'lost' and then recovered again
-min_pos  = 1;  % eliminate if fewer than min_pos good valid positions
-quiet    = 1;  % no text
+min_pos  = 1;                       % eliminate if fewer than min_pos good valid positions
+quiet    = 1;                       % no text
 
 pos_list = [];
 
@@ -127,7 +125,7 @@ res     = trackGT(pos_list,max_disp,param); % variable XYT, maximum displacement
 
 fprintf('\n -- Tracking Done --\n')
 
-save([filename '_tracks_GapMax' ],'res');
+% save([filename '_tracks_GapMax' ],'res');
 
 fprintf('\n -- 3. Tracks Saved --\n')
 

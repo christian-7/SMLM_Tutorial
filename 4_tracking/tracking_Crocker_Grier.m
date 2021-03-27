@@ -17,12 +17,12 @@
 
 clear, close all, clc, clear
 
-pathd = ('/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/locResults');            % Data path
-pathR = ('/Volumes/CSieben_SSD/4_data_PALM/2020-07-01_ACE2_HEK/analysis');   % Results path
+pathd = ('/Users/csi20/Documents/Transcend/data_PALM/2020-03-05_M1_mEos/');            % Data path
+pathR = ('/Users/csi20/Documents/Transcend/data_PALM/2020-03-05_M1_mEos/analysis/');   % Results path
 
-imageID = 2;
+imageID = 4;
 
-name_base = ['HEK_gain300_20ms_37deg_PCglas_Cell' num2str(imageID)];
+name_base = ['A549_M1mEosC1_447_gain300_30ms_00' num2str(imageID)];
 
 pxl_size    = 160;  % nm
 time_step   = 0.03; % in sec
@@ -60,13 +60,13 @@ fprintf('\n -- Data loaded --\n')
 close all
 
 filtered    = []; density =[];
-NNdist      = 300; % nm for the density plot
+NNdist      = 400; % nm for the density plot
 NoNind      = [];
 
 %%%%% Filter
 
 
-min_int     = 12;    % min photons
+min_int     = 10;   % min photons
 min_sigma   = 100;  % min sigma
 max_sigma   = 200;  % max sigma
 
@@ -90,10 +90,11 @@ end
 
 figure('Position',[100 600 600 600],'Name',['STD image']);
 imagesc(flipud(WF_image),[0 10*median(WF_image(:))]);hold on;
-colormap(grey)
+colormap(gray)
 axis square;
 xlabel('pxl');
 ylabel('pxl');
+set(gca,'FontSize',12)
 
 figure('Position',[100 600 1200 400])
 subplot(1,2,1)
@@ -102,6 +103,7 @@ title([num2str(length(filtered)),' from ',num2str(length(locs)),' left after fil
 axis([min(filtered(:,1)) max(filtered(:,1)) min(filtered(:,2)) max(filtered(:,2))])
 xlabel('nm');
 ylabel('nm');
+set(gca,'FontSize',12)
 box on; axis equal;
 
 subplot(1,2,2)
@@ -112,6 +114,7 @@ axis([min(density(:,1)) max(density(:,1)) min(density(:,2)) max(density(:,2))])
 xlabel('nm');
 ylabel('nm');
 whitebg(1,'k')
+set(gca,'FontSize',12)
 box on; axis equal;
 
 % Create pos_list for track.m --> tracking in pxl/frames
@@ -127,7 +130,7 @@ fprintf('\n -- Data filtered / PosList generated--\n')
 %% 3. Select ROI
 close all
 
-pxlsize = 1;
+pxlsize = 0.5;
 
 heigth  = round((max(pos_list(:,2))-min(pos_list(:,2)))/pxlsize);
 width   = round((max(pos_list(:,1))-min(pos_list(:,1)))/pxlsize);
@@ -142,6 +145,7 @@ imagesc(imrotate(im,90),[0 10]);
 title('Please select ROI');
 xlabel('x [pxl]');
 ylabel('y [pxl]');
+set(gca,'FontSize',12)
 axis square
 
 rect = getrect;
@@ -167,9 +171,11 @@ scatter(ROIselect(:,1),ROIselect(:,2),1);hold on; box on;
 title('Selected ROI, Input for tracking');
 xlabel('x [pxl]');
 ylabel('y [pxl]');
+axis([min(ROIselect(:,1)) max(ROIselect(:,1)) min(ROIselect(:,2)) max(ROIselect(:,2))])
+set(gca,'FontSize',12)
     
 %% 4. Track 
-
+close all
 % using the Crocker, Weeks, and Grier Algorithm (http://www.physics.emory.edu/rweeks/idl/index.html)
 
 % mem   - number of time steps that a particle can be 'lost' and then recovered again

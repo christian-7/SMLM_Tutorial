@@ -38,7 +38,7 @@ all_tracks = res;
 %%%%%%%%%%%%
 % On time, not the number of blinks
 % This is the time (frames) the molecule is visible
-% To get the number of blinks, the data needs to be merged with 0 gap
+% To get the number of blinks, the data need to be merged with 0 gap
 %%%%%%%%%%%%
 
 
@@ -61,8 +61,10 @@ figure('Position',[100 500 300 300],'name','Track length histogram')
 bar(binCenters,x/sum(x));hold on;
 axis([-5 50 0 0.9]);
 title(['Mean = ', num2str(mean(tracklength))]);
-xlabel('on time (frames)');
-ylabel('norm counts')
+% xlabel('on time (frames)');
+xlabel('number of blinks');
+ylabel('norm counts'); 
+axis square;
 
 
 %% 3.1 Calculate Track Spread (i.e. sigma)
@@ -294,10 +296,11 @@ for i = 1:max(all_tracks(:,6));
 end
 
 binCenters = 0:100:10000;
-x=transpose(hist(allgaps,binCenters)); 
+x = transpose(hist(allgaps,binCenters)); 
 
 
-figure
+figure('Position',[100 500 700 300],'name','Dark time distribution')
+subplot(1,2,1)
 bar(binCenters,x/max(x));
 ax = gca;
 ax.YScale = 'log'
@@ -307,19 +310,12 @@ ylabel('norm counts');
 hold on
 
 
-% 
-% 
-% ft = fittype('exp1');
-% [gapfit, gof] = fit(x/max(x),transpose(binCenters),'exp1');
-% 
-% f = fit(x/max(x),transpose(binCenters),'exp1');
-% plot(f,x/max(x),transpose(binCenters));
-% ax = gca;
-% ax.YScale = 'log'
-% 
+[CdfY,CdfX] = ecdf(allgaps,'Function','cdf'); 
+subplot(1,2,2)
+plot(CdfX,CdfY,'LineWidth',3);hold on;
+scatter(CdfX(max(find(CdfY < 0.99))),1,'ro','filled');
+title(['99 % at ' num2str(CdfX(max(find(CdfY < 0.99)))) ' frames']);
+xlabel('Off time [frames]');
+ylabel('cumulative probability');
 % save('gap.mat','gapfit','ft','gof','binCenters','x')
-% 
-% [CdfY,CdfX] = ecdf(allgaps,'Function','cdf'); 
-% [gapfit, gof] = fit(CdfX,CdfY,'exp1');
-% save('gap.mat','gapfit','ft','gof','binCenters','x')
-%     
+    

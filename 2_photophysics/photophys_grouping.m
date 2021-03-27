@@ -10,7 +10,7 @@
 
 clear, clc, close all
 
-SMLM_tutorial_main = '/Users/christian/Documents/Arbeit/MatLab/SMLM_tutorial'; % for relative path
+SMLM_tutorial_main = '/Users/csi20/Documents/Arbeit/MatLab/SMLM_tutorial'; % for relative path
 
 %% 1. Load locs
 
@@ -101,6 +101,6 @@ scatter(locs_grouped(:,1), locs_grouped(:,2),15,'r')
 
 % Save merged localizations
 
-save(['Locs_Merged_' filename],'locs_grouped');
+% save(['Locs_Merged_' filename],'locs_grouped');
 
 fprintf('\n -- 3. Locs Merged and Saved --\n')
